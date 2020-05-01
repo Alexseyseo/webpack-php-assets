@@ -14,8 +14,8 @@ class PhpWebpackPlugin {
         this.options = {
             filename: options.filename || 'assetsWebpack.php',
             entryPoint: options.entryPoint,
+            customOutput: options.customOutput || '',
         };
-        this.options.output.path = options.outputDir || this.options.output.path;
         if (!this.options.filename.endsWith('.php')) this.options.filename += '.php';
     }
 
@@ -74,8 +74,8 @@ class PhpWebpackPlugin {
             }
             const output = genPHPOutputAssocArray(entryPointsArray);
 
-            mkOutputDir(path.resolve(compiler.options.output.path, '../assets'));
-            fs.writeFileSync(path.join(compiler.options.output.path, '../assets', options.filename),output, done );
+            mkOutputDir(path.resolve(compiler.options.output.path, options.customOutput));
+            fs.writeFileSync(path.join(compiler.options.output.path, options.customOutput, options.filename),output, done );
         });
     }
 }
