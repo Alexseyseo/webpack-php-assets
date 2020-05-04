@@ -12,7 +12,7 @@ class PhpWebpackPlugin {
     constructor(options) {
         options = options || {};
         this.options = {
-            filename: options.filename || 'assetsWebpack.php',
+            filename: options.filename || 'vueChunks.php',
             entryPoint: options.entryPoint,
             customOutput: options.customOutput || '',
         };

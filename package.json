@@ -1,7 +1,7 @@
 {
-  "name": "webpack-php-assets",
-  "version": "0.0.1",
-  "description": "Create assets webpack files",
+  "name": "@alexseyseo/webpack-php-assets",
+  "version": "0.0.3",
+  "description": "Create php assets webpack files",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
