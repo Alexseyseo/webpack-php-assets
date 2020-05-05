@@ -26,12 +26,14 @@ class PhpWebpackPlugin {
             let output = PHPAssocArrayUtils.phpHeader();
             output += PHPAssocArrayUtils.returnWithBracket(0);
             entryPoints.forEach(item => {
-                const {name, chunks, assets} = item;
+                const {name, chunks, assets, mode} = item;
                 output += PHPAssocArrayUtils.arrayKeyWithGT(name, 1);
                 output += PHPAssocArrayUtils.openingBracket(0);
                 chunks.forEach((chunk, key) => {
-                    let asset = path.join(compiler.options.output.publicPath, assets[key]);
-                    asset = asset.replace(/\\/gm,'/');
+
+                    let asset = (mode === 'build') ?
+                        path.join(compiler.options.output.publicPath, assets[key]) :
+                        assets[key];
                     output += PHPAssocArrayUtils.arrayKeyWithGT(chunk, 2) + ` '${asset}',\n`
                 });
                 output += PHPAssocArrayUtils.closingBracket(1);
@@ -50,17 +52,38 @@ class PhpWebpackPlugin {
             }
         };
 
-        compiler.hooks.afterEmit.tap("LaminasMvcViewPlugin", (compilation,done) => {
+        compiler.hooks.afterEmit.tap("webpack-dev-assets", (compilation,done) => {
+            const devServer = compilation.options.devServer;
+            let devServerUrl = null;
             const stats = compilation.getStats().toJson();
             const {entrypoints} = stats;
             const entryPoint = options.entryPoint;
             let entryPointsArray  = [];
+
+            if (!_.isEmpty(devServer)) {
+                const protocol = devServer.https ? 'https://' : 'http://';
+                const host = devServer.host ? devServer.host : '0.0.0.0';
+                const port = devServer.port ? devServer.port : '8080';
+                devServerUrl = protocol + host + ':' + port;
+            }
+
             if (!entryPoint) {
                 _.mapKeys(entrypoints, (value, key) => {
                     entryPointsArray.push({
+                        mode: 'build',
                         name: key,
                         chunks: value.chunks,
                         assets: value.assets,
+                    });
+
+                    const devAssets = _.map(value.chunks, (nameAsset) => {
+                        return devServerUrl + '/js/' + nameAsset + '.js';
+                    })
+                    entryPointsArray.push({
+                        mode: 'serve',
+                        name: key + 'Serve',
+                        chunks: value.chunks,
+                        assets: devAssets,
                     });
                 });
             } else {
@@ -72,6 +95,7 @@ class PhpWebpackPlugin {
                     });
                 }
             }
+
             const output = genPHPOutputAssocArray(entryPointsArray);
 
             mkOutputDir(path.resolve(compiler.options.output.path, options.customOutput));
