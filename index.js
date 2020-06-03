@@ -29,12 +29,13 @@ class PhpWebpackPlugin {
                 const {name, chunks, assets, mode} = item;
                 output += PHPAssocArrayUtils.arrayKeyWithGT(name, 1);
                 output += PHPAssocArrayUtils.openingBracket(0);
-                chunks.forEach((chunk, key) => {
-
-                    let asset = (mode === 'build') ?
-                        path.join(compiler.options.output.publicPath, assets[key]) :
-                        assets[key];
-                    output += PHPAssocArrayUtils.arrayKeyWithGT(chunk, 2) + ` '${asset}',\n`
+                assets.forEach((chunk, key) => {
+                    if (assets[key].indexOf('map') === -1) {
+                        let asset = (mode === 'build') ?
+                            path.join(compiler.options.output.publicPath, assets[key]) :
+                            assets[key];
+                        output += PHPAssocArrayUtils.arrayKeyWithGT(chunk, 2) + ` '${asset}',\n`
+                    }
                 });
                 output += PHPAssocArrayUtils.closingBracket(1);
             });
